@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Check-In Scanner</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Check-In Scanner</h1>
+
+    <div id="status" class="msg neutral">Ready to scan.</div>
+
+    <h2>Camera</h2>
+    <div id="reader"></div>
+
+    <h2>Manual / USB scanner</h2>
+    <form id="manual-form" class="inline-form">
+      <input id="manual-id" placeholder="e.g. SEM-3F9A1C2B7D" autofocus autocomplete="off">
+      <button type="submit">Check In</button>
+    </form>
+
+    <h2>Recent</h2>
+    <ul id="log" class="log"></ul>
+
+    <div class="nav"><a href="/">Registration</a> | <a href="/attendees">Attendee list</a></div>
+  </div>
+
+  <script>
+    const statusBox = document.getElementById('status');
+    const log = document.getElementById('log');
+
+    let lastCode = null, lastTime = 0;   // ignore the same code re-read within 3s
+
+    async function checkIn(id) {
+      id = (id || '').trim();
+      if (!id) return;
+      const now = Date.now();
+      if (id === lastCode && now - lastTime < 3000) return;
+      lastCode = id; lastTime = now;
+
+      statusBox.className = 'msg neutral';
+      statusBox.textContent = 'Checking ' + id + '...';
+      try {
+        const res = await fetch('/api/checkin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participant_id: id })
+        });
+        const data = await res.json();
+        statusBox.textContent = data.message;
+        statusBox.className = 'msg ' + (data.status || 'invalid');  // success / already / invalid
+        const li = document.createElement('li');
+        li.textContent = new Date().toLocaleTimeString() + ' - ' + data.message;
+        log.prepend(li);
+      } catch (err) {
+        statusBox.textContent = 'Network error: ' + err;
+        statusBox.className = 'msg invalid';
+      }
+    }
+
+    // Manual input (a USB barcode scanner types the code and presses Enter)
+    document.getElementById('manual-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('manual-id');
+      lastCode = null;               // allow re-submitting the same ID manually
+      checkIn(input.value);
+      input.value = '';
+      input.focus();
+    });
+
+    // Camera scanner (needs http://localhost or https to get camera access)
+    if (window.Html5QrcodeScanner) {
+      const scanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 250 }, false);
+      scanner.render((text) => checkIn(text), () => {});
+    } else {
+      document.getElementById('reader').textContent =
+        'Camera library failed to load (offline?). Use the manual box.';
+    }
+  </script>
+</body>
+</html>

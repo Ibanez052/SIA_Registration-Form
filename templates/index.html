@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seminar Registration</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Seminar Registration</h1>
+
+    <form id="reg-form">
+      <label for="full_name">Full Name</label>
+      <input id="full_name" name="full_name" required>
+
+      <label for="email">Email Address</label>
+      <input id="email" name="email" type="email" required>
+
+      <label for="organization">Organization</label>
+      <input id="organization" name="organization">
+
+      <label for="contact_number">Contact Number</label>
+      <input id="contact_number" name="contact_number" type="tel">
+
+      <button type="submit" class="full">Register</button>
+    </form>
+
+    <div id="result" class="msg"></div>
+
+    <div class="nav"><a href="/scanner">Check-in scanner</a> | <a href="/attendees">Attendee list</a></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('reg-form');
+    const result = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = Object.fromEntries(new FormData(form));
+      result.className = 'msg neutral';
+      result.textContent = 'Submitting...';
+
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (!data.ok) {
+        result.className = 'msg error';
+        result.innerHTML = '<b>Error:</b> ' + data.message;
+        return;
+      }
+
+      let html = '<b>' + data.message + '</b>'
+               + '<p>Participant ID: <code>' + data.participant_id + '</code></p>'
+               + '<p>' + data.email_note + '</p>';
+      if (data.qr_url) {   // only present in MOCK_EMAIL mode
+        html += '<a href="' + data.qr_url + '" target="_blank">Open QR code</a>'
+              + '<img class="qr" src="' + data.qr_url + '" alt="QR code" width="200">';
+      }
+      result.className = 'msg success';
+      result.innerHTML = html;
+      form.reset();
+    });
+  </script>
+</body>
+</html>

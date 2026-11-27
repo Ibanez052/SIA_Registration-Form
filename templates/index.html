@@ -4,32 +4,60 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Seminar Registration</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Seminar Registration</h1>
 
-    <form id="reg-form">
-      <label for="full_name">Full Name</label>
-      <input id="full_name" name="full_name" required>
+  <header>
+    <a class="brand" href="#welcome"><span class="logo">9T</span> NINE Tech Group Seminar</a>
+    <nav aria-label="Primary">
+      <a href="index.html" aria-current="page">Welcome</a>
+      <a href="registration.html">Registration</a>
+      <a href="#qr-pass">QR Pass</a>
+      <a href="scanner.html">Staff Scanner</a>
+    </nav>
+  </header>
 
-      <label for="email">Email Address</label>
-      <input id="email" name="email" type="email" required>
+  <main>
+    <section>
+      <span class="badge"><i></i> Project No. 3 &bull; Annual Tech &amp; Engineering Symposium</span>
+      <h1>NINE Tech Group Seminar</h1>
+      <p class="lede">Seamless web registration, instant digital QR pass generation, and real-time on-site check-in verification for participants and event coordinators.</p>
 
-      <label for="organization">Organization</label>
-      <input id="organization" name="organization">
+      <div class="facts">
+        <span class="chip"><b>Date:</b> November 24, 2026</span>
+        <span class="chip"><b>Time:</b> 9:00 AM – 4:00 PM</span>
+        <span class="chip"><b>Venue:</b> Main Auditorium &bull; Gate A</span>
+      </div>
 
-      <label for="contact_number">Contact Number</label>
-      <input id="contact_number" name="contact_number" type="tel">
+      <p class="roster-label">REGISTERED SEMINAR ROSTER (5 DELEGATES)</p>
+      <div class="roster">
+        <span class="chip dark">Ivan Josh Maguillo</span>
+        <span class="chip">Albrecht Jhon Tan</span>
+        <span class="chip">Arvin Rovic Gorgonio</span>
+        <span class="chip">Danly Reyes</span>
+        <span class="chip">Ian Paulo Gilera</span>
+      </div>
+    </section>
 
-      <button type="submit" class="full">Register</button>
-    </form>
-
-    <div id="result" class="msg"></div>
-
-    <div class="nav"><a href="/scanner">Check-in scanner</a> | <a href="/attendees">Attendee list</a></div>
-  </div>
+    <section class="portals" aria-label="Sign in">
+      <a class="card attendee" href="#registration">
+        <span class="tag">Attendee Portal</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <h2>Sign in as Attendee</h2>
+        <p>Complete your registration details to generate your personalized QR admission pass, download as PNG, or resend via email.</p>
+      </a>
+      <a class="card staff" href="#staff-scanner">
+        <span class="tag">Event Operations</span>
+        <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <h2>Sign in as Staff</h2>
+        <p>Launch the on-site QR code scanner to verify passes, simulate scan outcomes, and manage the live check-in directory.</p>
+      </a>
+    </section>
+  </main>
 
   <script>
     const form = document.getElementById('reg-form');

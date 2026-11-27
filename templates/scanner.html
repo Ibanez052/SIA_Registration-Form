@@ -1,38 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Check-In Scanner</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>Staff On-Site Check-In Terminal — Gate A</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>Check-In Scanner</h1>
 
-    <div id="status" class="msg neutral">Ready to scan.</div>
+  <header>
+        <a class="brand" href="#welcome"><span class="logo">9T</span> NINE Tech Group Seminar</a>
+        <nav aria-label="Primary">
+            <a href="index.html">Welcome</a>
+            <a href="registration.html">Registration</a>
+            <a href="#qr-pass">QR Pass</a>
+            <a href="scanner.html" aria-current="page">Staff Scanner</a>
+        </nav>
+    </header>
 
-    <h2>Camera</h2>
-    <div id="reader"></div>
+  <main class="scan">
+    <h1 class="scan-title">Check-In Scanner</h1>
 
-    <h2>Manual / USB scanner</h2>
-    <form id="manual-form" class="inline-form">
-      <input id="manual-id" placeholder="e.g. SEM-3F9A1C2B7D" autofocus autocomplete="off">
-      <button type="submit">Check In</button>
-    </form>
+    <div class="scan-left">
+      <section class="scanner-card" aria-label="Camera">
+        <div id="reader"></div>
+      </section>
 
-    <h2>Recent</h2>
-    <ul id="log" class="log"></ul>
+      <section class="picker" aria-label="Manual entry">
+        <h2>Manual / USB scanner</h2>
+        <form id="manual-form" class="inline-form">
+          <input id="manual-id" placeholder="e.g. SEM-3F9A1C2B7D" autofocus autocomplete="off" aria-label="Participant ID">
+          <button type="submit">Check In</button>
+        </form>
+      </section>
+    </div>
 
-    <div class="nav"><a href="/">Registration</a> | <a href="/attendees">Attendee list</a></div>
-  </div>
+    <div class="scan-right">
+      <div id="status" class="msg neutral" role="status" aria-live="polite">Ready to scan.</div>
+
+      <section class="dir" aria-labelledby="recent-title">
+        <div class="dir-head">
+          <h2 id="recent-title">Recent</h2>
+          <span id="count">0 checked in this session</span>
+        </div>
+        <ul id="log" class="log"></ul>
+      </section>
+    </div>
+  </main>
 
   <script>
     const statusBox = document.getElementById('status');
     const log = document.getElementById('log');
+    const countBox = document.getElementById('count');
 
     let lastCode = null, lastTime = 0;   // ignore the same code re-read within 3s
+    let checkedInCount = 0;
 
     async function checkIn(id) {
       id = (id || '').trim();
@@ -50,9 +76,17 @@
           body: JSON.stringify({ participant_id: id })
         });
         const data = await res.json();
+        const kind = data.status || 'invalid';          // success / already / invalid
         statusBox.textContent = data.message;
-        statusBox.className = 'msg ' + (data.status || 'invalid');  // success / already / invalid
+        statusBox.className = 'msg ' + kind;
+
+        if (kind === 'success') {
+          checkedInCount++;
+          countBox.textContent = checkedInCount + ' checked in this session';
+        }
+
         const li = document.createElement('li');
+        li.className = kind;
         li.textContent = new Date().toLocaleTimeString() + ' - ' + data.message;
         log.prepend(li);
       } catch (err) {

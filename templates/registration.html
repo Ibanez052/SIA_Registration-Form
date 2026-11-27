@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attendee Registration — NINE Tech Group Seminar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header>
+        <a class="brand" href="#welcome"><span class="logo">9T</span> NINE Tech Group Seminar</a>
+        <nav aria-label="Primary">
+            <a href="index.html">Welcome</a>
+            <a href="registration.html" aria-current="page">Registration</a>
+            <a href="#qr-pass">QR Pass</a>
+            <a href="scanner.html">Staff Scanner</a>
+        </nav>
+    </header>
+
+    <main class="reg">
+        <aside class="reg-side">
+            <div>
+            <span class="step-tag">Step 01 &bull; Attendee Sign Up</span>
+            <h1 class="reg-title">Seminar Registration</h1>
+            <p class="reg-intro">Enter participant details or choose a quick attendee preset below to auto-fill the form and generate a unique QR pass.</p>
+
+        <p class="mono-label">Quick attendee presets:</p>
+        <div class="presets" id="presets">
+          <button type="button" class="preset is-active" data-i="0">Ivan Josh Maguillo</button>
+          <button type="button" class="preset" data-i="1">Albrecht Jhon Tan</button>
+          <button type="button" class="preset" data-i="2">Arvin Rovic Gorgonio</button>
+          <button type="button" class="preset" data-i="3">Danly Reyes</button>
+          <button type="button" class="preset" data-i="4">Ian Paulo Gilera</button>
+        </div>
+      </div>
+
+      <div class="checklist">
+        <h2>Registration Checklist</h2>
+        <ol>
+          <li><span>1</span> Verify full name &amp; institution spelling</li>
+          <li><span>2</span> Active email for automated QR ticket delivery</li>
+          <li><span>3</span> Present generated QR Pass at Main Hall Gate A</li>
+        </ol>
+      </div>
+    </aside>
+
+    <section class="reg-card" aria-labelledby="details-title">
+      <div class="reg-card-head">
+        <div>
+          <h2 id="details-title">Participant Details</h2>
+          <p>All fields marked with * are required</p>
+        </div>
+        <span class="id-badge" id="pid">NTG-2026-001</span>
+      </div>
+
+      <form id="reg-form" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="full_name">Full Name *</label>
+            <input id="full_name" name="full_name" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="email">Email Address *</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="organization">Organization / Institution *</label>
+            <input id="organization" name="organization" type="text" autocomplete="organization" required>
+          </div>
+          <div class="field">
+            <label for="phone">Contact Number *</label>
+            <div class="phone">
+              <span class="phone-code">+63</span>
+              <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn-primary" type="submit">Complete Registration &amp; Generate QR Pass &rarr;</button>
+          <button class="btn-ghost" type="button" id="reset">Reset</button>
+        </div>
+      </form>
+
+      <div id="result" class="msg" role="status" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script>
+    // true  = works on its own, no backend needed
+    // false = sends the form to your Flask route /api/register
+    const USE_MOCK = true;
+
+    // Placeholder details. Replace with your real delegates.
+    const PRESETS = [
+      { full_name: 'Ivan Josh Maguillo',   email: 'ivan.maguillo@ninetech.io',   organization: 'NINE Tech Group', phone: '917 555 0194' },
+      { full_name: 'Albrecht Jhon Tan',    email: 'albrecht.tan@ninetech.io',    organization: 'NINE Tech Group', phone: '917 555 0111' },
+      { full_name: 'Arvin Rovic Gorgonio', email: 'arvin.gorgonio@ninetech.io',  organization: 'NINE Tech Group', phone: '917 555 0122' },
+      { full_name: 'Danly Reyes',          email: 'danly.reyes@ninetech.io',     organization: 'NINE Tech Group', phone: '917 555 0133' },
+      { full_name: 'Ian Paulo Gilera',     email: 'ian.gilera@ninetech.io',      organization: 'NINE Tech Group', phone: '917 555 0144' }
+    ];
+
+    const form = document.getElementById('reg-form');
+    const result = document.getElementById('result');
+    const pid = document.getElementById('pid');
+    const presetBtns = document.querySelectorAll('.preset');
+
+    function fill(i) {
+      const p = PRESETS[i];
+      for (const key in p) form.elements[key].value = p[key];
+      presetBtns.forEach((b, n) => b.classList.toggle('is-active', n === i));
+      pid.textContent = 'NTG-2026-00' + (i + 1);
+      result.className = 'msg';
+      result.textContent = '';
+    }
+
+    presetBtns.forEach(b => b.addEventListener('click', () => fill(+b.dataset.i)));
+
+    document.getElementById('reset').addEventListener('click', () => {
+      form.reset();
+      presetBtns.forEach(b => b.classList.remove('is-active'));
+      result.className = 'msg';
+      result.textContent = '';
+    });
+
+    function show(kind, title, lines) {
+      result.className = 'msg ' + kind;
+      result.textContent = '';
+      const b = document.createElement('b');
+      b.textContent = title;
+      result.appendChild(b);
+      (lines || []).forEach(t => {
+        const p = document.createElement('p');
+        p.textContent = t;
+        result.appendChild(p);
+      });
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const payload = Object.fromEntries(new FormData(form));
+      payload.phone = '+63' + payload.phone.replace(/\s+/g, '');
+      const btn = form.querySelector('.btn-primary');
+      btn.disabled = true;
+      show('neutral', 'Submitting...');
+
+      try {
+        let data;
+        if (USE_MOCK) {
+          data = {
+            ok: true,
+            message: 'Registration complete',
+            participant_id: pid.textContent,
+            email_note: 'Your QR pass will be sent to ' + payload.email
+          };
+        } else {
+          const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          data = await res.json();
+        }
+
+        if (!data.ok) { show('error', 'Error:', [data.message]); return; }
+        show('success', data.message, [
+          'Participant ID: ' + data.participant_id,
+          data.email_note
+        ]);
+      } catch (err) {
+        show('error', 'Could not reach the server.', ['Check your connection and try again.']);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    fill(0);
+  </script>
+</body>
+</html>
